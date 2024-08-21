@@ -70,6 +70,7 @@ class Feedforward:
 
         # Transform and normalze to [0, 1]
         solid_t = cv.normalize(np.float32(self.transform(solid)), None, norm_type=cv.NORM_MINMAX)
+        solid_t = self.percentile_normalize(solid_t, 98)
 
         # initial_guess = (0.8, 1500, 800, 1000, 1000, 135,)
         initial_guess = [7.85867699e-01, 1.68624522e+03, 7.32967556e+02, 7.11864416e+02,
@@ -108,7 +109,11 @@ class Feedforward:
         fit = self.gaussian_2d((xxbig, yybig), amplitude_fit, xo_fit, yo_translated, sigma_x_fit, sigma_y_fit, theta_fit)
         fit = np.float32(fit).reshape(self.dmd.xdim, self.dmd.xdim)
 
-        flat_field = solid_t - fit[a_fit:b_fit, :] * alpha
+        # flat_field = solid_t - fit[a_fit:b_fit, :] * alpha
+        flat_field = np.array(solid_t)
+        flat_field[fit[a_fit:b_fit, :] > 0.01] /= fit[a_fit:b_fit, :][fit[a_fit:b_fit, :] > 0.01]
+        flat_field[flat_field <= 0.01] = 1
+
         flat_field = np.float32(cv.normalize(flat_field, None, 0, 255, cv.NORM_MINMAX))
         # flat_field[flat_field < np.min(flat_field) + 10] = np.median(flat_field)
         
@@ -254,7 +259,7 @@ if __name__ == "__main__":
 
     ff = Feedforward("128.111.8.162", 8000, invert=True)
 
-    img = ff.show_test_image(ff.img_gen.linear_gradient(0))
+    # img = ff.show_test_image(ff.img_gen.linear_gradient(0))
     
 
     tl = (305, 315)
@@ -262,32 +267,36 @@ if __name__ == "__main__":
     # bl = (352, 1400)
     br = (3085, 1785)
     ff.set_transformation(np.float32([tl, tr, br]), show_pts=False)
-    t = ff.transform(img)
+    # t = ff.transform(img)
 
     # p = [7.95607253e-01, 1.70821661e+03, 7.10791491e+02, 7.10309487e+02,
     #     5.81035417e+02, 1.34338774e+0]
     _, solid, flat = ff.get_flat_field()
 
     fig, ax = plt.subplots(1, 3)
+    ax[0].imshow(_)
+    ax[1].imshow(solid)
+    ax[2].imshow(flat)
+    plt.show()
    
     
-    flat = ff.percentile_normalize(flat, 98)
-    # solid = ff.transform(ff.show_test_image(ff.img_gen.solid_field(xmin=500, invert=True)))
-    # solid = ff.percentile_normalize(solid, 95)
-    t_slope = 1
-    target = np.float32(ff.img_gen.linear_gradient(0, bg_invert=True, no_dither=True))
-    target = t_slope * target / np.max(target)
+    # flat = ff.percentile_normalize(flat, 98)
+    # # solid = ff.transform(ff.show_test_image(ff.img_gen.solid_field(xmin=500, invert=True)))
+    # # solid = ff.percentile_normalize(solid, 95)
+    # t_slope = 1
+    # target = np.float32(ff.img_gen.linear_gradient(0, bg_invert=True, no_dither=True))
+    # target = t_slope * target / np.max(target)
 
 
-    target_0, target_i, caps, errs = ff.run([], solid, 1, t_slope=t_slope)
+    # target_0, target_i, caps, errs = ff.run([], solid, 1, t_slope=t_slope)
 
-    fig, ax = plt.subplots(2, 4, figsize=(10, 5), constrained_layout=True)
+    # fig, ax = plt.subplots(2, 4, figsize=(10, 5), constrained_layout=True)
 
-    avg = np.sum(caps[0], axis=0)
+    # avg = np.sum(caps[0], axis=0)
 
-    filtered = np.array(caps[0]) 
-    filtered[flat > 0.1] /= flat[flat > 0.1]
-    filtered = ff.percentile_normalize(filtered, 98)
+    # filtered = np.array(caps[0]) 
+    # filtered[flat > 0.1] /= flat[flat > 0.1]
+    # filtered = ff.percentile_normalize(filtered, 98)
 
     # cax00 = ax[0].imshow(caps[0])
     # cax01 = ax[1].imshow(errs[0], cmap="RdBu", vmin=-1, vmax=1)
@@ -300,21 +309,21 @@ if __name__ == "__main__":
     # rms_3 = ff.compute_rms(ff.percentile_normalize(caps[-1], 99) * t_slope, target)
     # print(f"RMS_0 = {rms_0:.2f}. RMS_7 = {rms_3:.2f}")
 
-    cax00 = ax[0, 0].imshow(target_0)
-    ax[0, 0].set_title("$\mathrm{DMD}_0(x,y)$")
-    cax01 = ax[0, 1].imshow(target_i)
-    ax[0, 1].set_title("$\mathrm{DMD}_7(x,y) \; \eta = 0.1$")
-    cax02 = ax[0, 2].imshow(caps[0])
-    ax[0, 2].set_title("$T_0 (x, y)$")
-    cax03 = ax[0, 3].imshow(caps[-1])
-    ax[0, 3].set_title("$T_7 (x, y)$")
-    # cax04 = ax[0, 4].imshow(solid_fit)
-    cax10 = ax[1, 0].imshow(errs[0], cmap="RdBu")
-    ax[1, 0].set_title("$e_0(x, y)$")
-    cax11 = ax[1, 1].imshow(errs[-1], cmap="RdBu")
-    ax[1, 1].set_title("$e_7(x, y)$")
+    # cax00 = ax[0, 0].imshow(target_0)
+    # ax[0, 0].set_title("$\mathrm{DMD}_0(x,y)$")
+    # cax01 = ax[0, 1].imshow(target_i)
+    # ax[0, 1].set_title("$\mathrm{DMD}_7(x,y) \; \eta = 0.1$")
+    # cax02 = ax[0, 2].imshow(caps[0])
+    # ax[0, 2].set_title("$T_0 (x, y)$")
+    # cax03 = ax[0, 3].imshow(caps[-1])
+    # ax[0, 3].set_title("$T_7 (x, y)$")
+    # # cax04 = ax[0, 4].imshow(solid_fit)
+    # cax10 = ax[1, 0].imshow(errs[0], cmap="RdBu")
+    # ax[1, 0].set_title("$e_0(x, y)$")
+    # cax11 = ax[1, 1].imshow(errs[-1], cmap="RdBu")
+    # ax[1, 1].set_title("$e_7(x, y)$")
 
-    ax[1, 2].imshow(t)
+    # ax[1, 2].imshow(t)
 
     # ax[1, 2].plot(np.sum(caps[0], axis=0) / 1600)
     # ax[1, 2].plot(target[800, :]/t_slope)
@@ -328,14 +337,14 @@ if __name__ == "__main__":
     # # print(np.min(emap))
     # # print(np.max(emap))
 
-    fig.colorbar(cax00, ax=ax[0, 0], orientation="vertical", location="left")
+    # fig.colorbar(cax00, ax=ax[0, 0], orientation="vertical", location="left")
     # fig.colorbar(cax01, ax=ax[0, 1], orientation="horizontal", location="bottom")
     # fig.colorbar(cax02, ax=ax[0, 2], orientation="horizontal", location="bottom")
     # fig.colorbar(cax03, ax=ax[0, 3], orientation="horizontal", location="bottom")
     # # fig.colorbar(cax04, ax=ax[0, 4], orientation="horizontal", location="bottom")
-    fig.colorbar(cax10, ax=ax[1, 0], orientation="vertical", location="right")
+    # fig.colorbar(cax10, ax=ax[1, 0], orientation="vertical", location="right")
     # fig.colorbar(cax11, ax=ax[1, 1], orientation="horizontal", location="bottom")
 
-    plt.show()
+    # plt.show()
 
     
