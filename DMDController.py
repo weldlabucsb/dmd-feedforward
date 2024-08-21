@@ -1,8 +1,15 @@
+"""
+DMDController class used to control and display patterns on the DMD over HDMI connection
+
+author: Daniel Harrington
+8/2024
+"""
+
+
 import numpy as np
 import cv2 as cv
 import time
 from screeninfo import get_monitors
-import threading, faulthandler
 
 class DMDController:
 
