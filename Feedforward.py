@@ -42,16 +42,6 @@ class Feedforward:
                                 + c*((y-yo)**2)))
         return g.ravel()
     
-    @staticmethod
-    def remove_border(img: np.ndarray, border_width: int):
-
-        zeroed = np.array(img)
-        zeroed[:border_width, :] = 0
-        zeroed[:img.shape[0]-border_width:, :] = 0
-        zeroed[:, :border_width] = 0
-        zeroed[:, img.shape[1]-border_width:] = 0
-        
-        return zeroed
     
     @staticmethod
     def percentile_normalize(array: np.ndarray, p: float) -> np.ndarray:
@@ -61,9 +51,8 @@ class Feedforward:
         array[array > 1] = 1
         return array
     
-
     
-    def get_flat_field(self, p_opt: list=None, alpha: float=1) -> np.ndarray:
+    def get_flat_field(self, p_opt: list=None) -> np.ndarray:
 
         self.dmd.update_array(self.img_gen.solid_field(invert=self.invert))
         solid = self.camera.get_image()
@@ -179,11 +168,8 @@ class Feedforward:
         error = alpha * (measured_image - target_image) / np.max(measured_image)
         return error
     
-    def create_update_map(self, error: np.ndarray, target: np.ndarray) -> np.ndarray:
+    def create_update_map(self, error: np.ndarray, target: np.ndarray, eta=0.2) -> np.ndarray:
 
-        # seed = np.random.random((self.dmd.ydim, self.dmd.xdim))
-        #todo random seed method
-        eta = 0.2
         update = target - eta * error
 
         # update = self.percentile_normalize(update, 95)
