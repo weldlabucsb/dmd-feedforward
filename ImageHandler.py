@@ -1,3 +1,11 @@
+"""
+Implements ImageHandler class for DMD image generation and dithering for linear gradients,
+solid fields, and borders useful for calibration.
+
+author: Daniel Harrington
+8/2024
+"""
+
 import cv2 as cv
 from PIL import Image
 import numpy as np

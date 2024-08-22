@@ -1,14 +1,19 @@
+"""
+Calculates Morlet wavelet transforms of given images.
+Determined not to be the best solution for fringe removal.
+
+author: Daniel Harrington
+8/2024
+"""
+
+
+
 import numpy as np
 import cv2 as cv
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from numpy.polynomial import Polynomial
 import pywt
-
-
-def defringeflat():
-
-    pass
 
 
 def compute_enhanced_rows(img: np.ndarray) -> np.ndarray:

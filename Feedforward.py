@@ -1,3 +1,11 @@
+"""
+Implements Feedforward class for DMD operation and optimization
+
+author: Daniel Harrington
+8/2024
+"""
+
+
 import numpy as np
 import cv2 as cv
 import matplotlib.pyplot as plt
@@ -8,7 +16,7 @@ from FemtoEasyBP import FemtoEasyBP
 from ImageHandler import ImageHandler
 from matplotlib.colors import LogNorm
 from mpl_toolkits.mplot3d import Axes3D
-import time, faulthandler
+import time
 from scipy.optimize import curve_fit
 from scipy.ndimage import convolve
 mpl.rcParams.update({"mathtext.fontset": "cm", "font.family": "serif", "figure.constrained_layout.use": True})
