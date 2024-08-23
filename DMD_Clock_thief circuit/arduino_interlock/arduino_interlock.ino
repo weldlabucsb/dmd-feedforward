@@ -17,8 +17,8 @@ off for min_off_ms. After the signal falls to LOW, the pulse cannot be interrupt
 min_off_ms time has passed.
 */
 
-const int TTL_input_pin = 9;
-const int MCP_control_pin = 2;
+const int TTL_input_pin = 5;
+const int MCP_control_pin = 4;
 const long max_on_ms = 1000; // Maximum time the MCP can be interrupted, prevents mirror sticking
 const long min_off_ms = 1000;
 
